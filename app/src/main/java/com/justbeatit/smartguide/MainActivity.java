@@ -33,9 +33,9 @@ public class MainActivity extends AppCompatActivity
 
     private final static int REQUEST_ENABLE_BT = 1;
 
-    final AtomicInteger x = new AtomicInteger(1);
     final Set<String> devices = new HashSet<>();
-    BluetoothAdapter mBluetoothAdapter;
+    final Set<String> newDevices = new HashSet<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                 MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
 
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
         }
@@ -82,26 +82,34 @@ public class MainActivity extends AppCompatActivity
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
-        mBluetoothAdapter.startDiscovery();
+
         BroadcastReceiver mReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
 
                 //Finding devices
-                if (BluetoothDevice.ACTION_FOUND.equals(action))
-                {
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     String deviceId = device.getName() + "\t" + device.getAddress();
 
-                    if (! devices.contains(deviceId)) {
-                        devices.add(deviceId);
+                    if (!newDevices.contains(deviceId)) {
+                        newDevices.add(deviceId);
                     }
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                    devices.clear();
+                    devices.addAll(newDevices);
+                    newDevices.clear();
+                    mBluetoothAdapter.startDiscovery();
                 }
             }
         };
 
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mReceiver, filter);
+        mBluetoothAdapter.startDiscovery();
+
     }
 
 
@@ -113,10 +121,6 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void run() {
                         try {
-                            if (mBluetoothAdapter != null) {
-                                mBluetoothAdapter.startDiscovery();
-                            }
-
                             StringBuilder sb = new StringBuilder();
                             for (String s : devices)
                             {
