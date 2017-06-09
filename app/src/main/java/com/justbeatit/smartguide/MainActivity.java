@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         discoverDevices();
-        startDiscoveringBeacons();
+        viewDiscoveredBeacons();
     }
 
 
@@ -98,9 +98,21 @@ public class MainActivity extends AppCompatActivity
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    String deviceId  = device.getName() + "\n" + device.getAddress();
+                    String deviceId  = device.getName() + " " + device.getAddress();
                     if (!newDevices.contains(deviceId)) {
                         newDevices.add(deviceId);
+
+                        if (deviceId.contains("robert") && !devices.contains(deviceId)){
+                            textToSpeach.speak("Robercie, znazłem twoje lenovo", TextToSpeech.QUEUE_FLUSH, null);
+                        }
+
+                        if (deviceId.contains("Dominik") && !devices.contains(deviceId)){
+                            textToSpeach.speak("Dominiku, znazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
+                        }
+
+                        if (deviceId.contains("Agnieszka") && !devices.contains(deviceId)){
+                            textToSpeach.speak("Agnieszko, znazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
+                        }
                     }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     devices.clear();
@@ -120,7 +132,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void startDiscoveringBeacons() {
+    private void viewDiscoveredBeacons() {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
