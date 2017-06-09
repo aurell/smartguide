@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -20,9 +21,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,7 +38,8 @@ public class MainActivity extends AppCompatActivity
 
     final Set<String> devices = new HashSet<>();
     final Set<String> newDevices = new HashSet<>();
-
+    TextToSpeech textToSpeach;
+    Button speachButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +49,22 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        textToSpeach = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR) {
+                    textToSpeach.setLanguage(new Locale("pl", "PL"));
+                }
+            }
+        });
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Speaking ...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                textToSpeach.speak("Cześć Aurelia. Oto mówiący telefon!", TextToSpeech.QUEUE_FLUSH, null);
             }
         });
 
@@ -74,14 +89,6 @@ public class MainActivity extends AppCompatActivity
                 MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
 
         final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            // Device does not support Bluetooth
-        }
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-
 
         BroadcastReceiver mReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
@@ -90,11 +97,10 @@ public class MainActivity extends AppCompatActivity
                 //Finding devices
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    String deviceId = device.getName() + "\t" + device.getAddress();
-
+                    // Add the name and address to an array adapter to show in a ListView
+                    devices.add(device.getName() + "\n" + device.getAddress());
                     if (!newDevices.contains(deviceId)) {
                         newDevices.add(deviceId);
-                    }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     devices.clear();
                     devices.addAll(newDevices);
@@ -122,8 +128,7 @@ public class MainActivity extends AppCompatActivity
                     public void run() {
                         try {
                             StringBuilder sb = new StringBuilder();
-                            for (String s : devices)
-                            {
+                            for (String s : devices) {
                                 sb.append(s);
                                 sb.append("\n");
                             }
@@ -134,8 +139,7 @@ public class MainActivity extends AppCompatActivity
                             /*
                             int test = x.incrementAndGet();
                             textView.setText(String.valueOf(test));*/
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             String m = e.getMessage();
                         }
                     }
