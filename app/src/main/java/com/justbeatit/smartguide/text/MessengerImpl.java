@@ -12,7 +12,7 @@ import java.util.Locale;
  * Created by Dominik.Czerwinski on 2017-06-09.
  */
 
-public class MessangerImpl implements Messanger {
+public class MessengerImpl implements Messenger {
 
     private final Context context;
     private final Activity activity;
@@ -20,7 +20,7 @@ public class MessangerImpl implements Messanger {
     private TextToSpeech textToSpeach;
     private TextView textToDisplay;
 
-    public MessangerImpl(Context context, Activity activity) {
+    public MessengerImpl(Context context, Activity activity) {
         this.context = context;
         this.activity = activity;
         this.mode = DisablitityType.BLIND;

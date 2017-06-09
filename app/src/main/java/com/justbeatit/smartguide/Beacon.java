@@ -7,13 +7,13 @@ package com.justbeatit.smartguide;
 public class Beacon {
     private final String name;
     private final String info;
-    private final String location;
+    private final String pathTips;
     private final String deviceId;
 
-    public Beacon(String name, String info, String location, String deviceId) {
+    public Beacon(String name, String info, String pathTips, String deviceId) {
         this.name = name;
         this.info = info;
-        this.location = location;
+        this.pathTips = pathTips;
         this.deviceId = deviceId;
     }
 
@@ -25,11 +25,18 @@ public class Beacon {
         return info;
     }
 
-    public String getLocation() {
-        return location;
+    public String getPathTips() {
+        return pathTips;
     }
 
     public String getDeviceId() {
         return deviceId;
+    }
+
+    @Override
+    public String toString() {
+        return "Beacon{" +
+                "deviceId='" + deviceId + '\'' +
+                '}';
     }
 }

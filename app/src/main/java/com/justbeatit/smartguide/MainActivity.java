@@ -1,18 +1,16 @@
 package com.justbeatit.smartguide;
 
 import android.Manifest;
-import android.app.SearchManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.RecognizerIntent;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -25,13 +23,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.justbeatit.smartguide.text.Messanger;
-import com.justbeatit.smartguide.text.MessangerImpl;
+import com.justbeatit.smartguide.text.Messenger;
+import com.justbeatit.smartguide.text.MessengerImpl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -50,9 +48,7 @@ public class MainActivity extends AppCompatActivity
     Place currentPlace;
     Beacon currentBeacon;
 
-    final Set<String> devices = new HashSet<>();
-    final Set<String> newDevices = new HashSet<>();
-    Messanger messanger;
+    Messenger messenger;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +58,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        messanger = new MessangerImpl(getApplicationContext(), this);
+        messenger = new MessengerImpl(getApplicationContext(), this);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,17 +80,15 @@ public class MainActivity extends AppCompatActivity
 
         setupLocations();
 
-        discoverDevices();
-
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                messanger.sendMessage(getString(R.string.info_start));
+                messenger.sendMessage(getString(R.string.info_start));
+                currentPlace.startDefaultPath();
+                discoverDevices();
             }
         }, 2000);
-
-
     }
 
     private void setupLocations() {
@@ -103,13 +97,28 @@ public class MainActivity extends AppCompatActivity
                 "",
                 "Bilety promocyjne można zakupić tylko w kasie biletowej Teatru. Bilety ulgowe przysługują uczniom, studentom, nauczycielom, emerytom, rencistom oraz osobom niepełnosprawnym. Bilety ulgowe bez udokumentowania prawa do ulgi nie uprawniają do wejścia na widownię. Kupujący winien udać się do kasy biletowej Teatru i uiścić dopłatę.",
                 "12:00 Dziennik przebudzenia. 20:00 Mój ulubiony Młynarski.",
-                new HashSet<>(Arrays.asList(
-                        new Beacon("Kasa", "Tu możesz kupić bilety.", "Jesteś na parterze", "Agnieszka"),
-                        new Beacon("Toalety", "Toaleta dla niepełnosprawnych znajduje się na końcu korytarza", "Jesteś na poziomie -1", "Aurelia"),
-                        new Beacon("Scena", "Główna scena teatru. Tu odbywają się koncerty.", "Jesteś na parterze", "Dominik"),
-                        new Beacon("Wejście", "Główne wejście do budynku.", "Jesteś na parterze.", "robert")
-                ))
-        );
+                new ArrayList<>(Arrays.asList(
+                        new Beacon("Wejście",
+                                "Witamy w teatrze szekspirowskim.",
+                                "Jesteś przy wejściu",
+                                "98:E7:F5:83:D3:A4"
+                        ),
+                        new Beacon("Schody - góra",
+                                "Skręć w lewi i schodami na sam dół.",
+                                "Jesteś w hallu przy schodach",
+                                "28:ED:6A:40:B9:39"
+                        ),
+                        new Beacon("Schody - dół",
+                                "Skręć w lewo, za drzwiami w prawo.",
+                                "Jesteś na poziomie -1 przy schodach",
+                                "50:55:27:24:AF:26"
+                        ),
+                        new Beacon("Toaleta",
+                                "Skręć w lewo, toaleta jest za drzwiami po prawej stronie.",
+                                "Toaleta.",
+                                "28:ED:6A:40:B9:39"
+                        )
+                )));
     }
 
     private void discoverDevices() {
@@ -121,24 +130,49 @@ public class MainActivity extends AppCompatActivity
 
         BroadcastReceiver mReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
+                String action = intent.getAction();
 
-            //Finding devices
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                String deviceId = device.getName() + " " + device.getAddress();
-                if (!newDevices.contains(deviceId)) {
-                    newDevices.add(deviceId);
-                    setCurrentBeacon(deviceId);
+                //Finding devices
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    String deviceId = device.getAddress();
+                    if (!currentPlace.isBeaconOnActivePath(deviceId)) {
+                        return;
+                    }
+                    Beacon currentBeacon = currentPlace.getCurrentBeaconOnActivePath();
+                    if (null != currentBeacon && deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
+                        // we still receive signal from current beacon
+                        showToastMessage("Still the same beacon...");
+                        // messenger.sendMessage(currentBeacon.getInfo());
+                        return;
+                    }
+                    currentBeacon = validateBeaconAndGetNext(currentBeacon);
+                    if (null == currentBeacon) {
+                        return;
+                    }
+                    if (deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
+                        // we caught signal from next beacon on the path
+                        showToastMessage("Next beacon: " + deviceId);
+                        messenger.sendMessage(currentBeacon.getPathTips());
+                        currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
+                        return;
+                    }
+                    currentPlace.getPreviousBeaconOnActivePath();
+                    currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
+                    if (null == currentBeacon) {
+                        showToastMessage("Path lost!");
+                        return;
+                    }
+                    if (deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
+                        // we still receive signal from current beacon
+                        showToastMessage("Previous beacon: " + deviceId);
+                        messenger.sendMessage(currentBeacon.getInfo());
+                        currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
+                        return;
+                    }
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                    mBluetoothAdapter.startDiscovery();
                 }
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                devices.clear();
-                devices.addAll(newDevices);
-                newDevices.clear();
-                checkCurrentBeacon();
-                mBluetoothAdapter.startDiscovery();
-            }
             }
         };
 
@@ -147,59 +181,18 @@ public class MainActivity extends AppCompatActivity
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mReceiver, filter);
         mBluetoothAdapter.startDiscovery();
-
     }
 
-    private void checkCurrentBeacon() {
-        if (currentBeacon == null) return;
-
-        for (String device : devices) {
-            if (device.contains(currentBeacon.getDeviceId())) {
-                return;
-            }
+    @Nullable
+    private Beacon validateBeaconAndGetNext(Beacon currentBeacon) {
+        if (null == currentBeacon) {
+            currentBeacon = currentPlace.getNextBeaconOnActivePath();
         }
-
-        //Didn't found current beacon in devices!
-        currentBeacon = null;
-    }
-
-    private void setCurrentBeacon(String deviceId) {
-        if (currentPlace == null || currentBeacon == null) return;
-
-        for (Beacon beacon : currentPlace.getBeacons()) {
-            if (deviceId.contains(beacon.getDeviceId()) && !currentBeacon.equals(beacon)) {
-                currentBeacon = beacon;
-                messanger.sendMessage(currentBeacon.getName());
-                messanger.sendMessage(currentBeacon.getInfo());
-            }
+        if (null == currentBeacon) {
+            // path is finished
+            showToastMessage("Path finished!");
         }
-    }
-
-
-    private void viewDiscoveredBeacons() {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            StringBuilder sb = new StringBuilder();
-                            for (String s : devices) {
-                                sb.append(s);
-                                sb.append("\n");
-                            }
-
-                            TextView textView = (TextView) findViewById(R.id.mainTextView);
-                            textView.setText(sb.toString());
-
-                        } catch (Exception e) {
-                            String m = e.getMessage();
-                        }
-                    }
-                });
-            }
-        }, 10, 1000);
+        return currentBeacon;
     }
 
     @Override
