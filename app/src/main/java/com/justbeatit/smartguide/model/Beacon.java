@@ -1,3 +1,5 @@
+package com.justbeatit.smartguide.model;
+
 /**
  * Created by aurel on 09.06.2017.
  */
