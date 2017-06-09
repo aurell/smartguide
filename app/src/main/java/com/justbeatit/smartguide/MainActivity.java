@@ -33,8 +33,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private final static int REQUEST_ENABLE_BT = 1;
+
     final AtomicInteger x = new AtomicInteger(1);
     List<String> devices = new ArrayList<>();
+    BluetoothAdapter mBluetoothAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +75,15 @@ public class MainActivity extends AppCompatActivity
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                 MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
 
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            // Device does not support Bluetooth
+        }
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
         mBluetoothAdapter.startDiscovery();
         BroadcastReceiver mReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
@@ -81,10 +92,12 @@ public class MainActivity extends AppCompatActivity
                 //Finding devices
                 if (BluetoothDevice.ACTION_FOUND.equals(action))
                 {
-                    // Get the BluetoothDevice object from the Intent
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // Add the name and address to an array adapter to show in a ListView
-                    devices.add(device.getName() + "\n" + device.getAddress());
+                    String deviceId = device.getName() + "\t" + device.getAddress();
+
+                    if (! devices.contains(deviceId)) {
+                        devices.add(deviceId);
+                    }
                 }
             }
         };
@@ -102,6 +115,10 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void run() {
                         try {
+                            if (mBluetoothAdapter != null) {
+                                mBluetoothAdapter.startDiscovery();
+                            }
+
                             StringBuilder sb = new StringBuilder();
                             for (String s : devices)
                             {
