@@ -1,12 +1,10 @@
-package com.justbeatit.smartguide.context;
+package com.justbeatit.smartguide.text;
 
 import android.app.Activity;
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.justbeatit.smartguide.R;
 
 import java.util.Locale;
 
@@ -36,7 +34,6 @@ public class MessangerImpl implements Messanger {
                         }
                     }
                 });
-                break;
             case DEAF:
                 break;
         }
