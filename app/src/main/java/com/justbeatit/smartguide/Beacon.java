@@ -5,19 +5,31 @@ package com.justbeatit.smartguide;
  */
 
 public class Beacon {
-    public String Name;
-    public String Info;
-    public String Location;
-    public String DeviceId;
-
-    public Beacon() {
-
-    }
+    private final String name;
+    private final String info;
+    private final String location;
+    private final String deviceId;
 
     public Beacon(String name, String info, String location, String deviceId) {
-        Name = name;
-        Info = info;
-        Location = location;
-        DeviceId = deviceId;
+        this.name = name;
+        this.info = info;
+        this.location = location;
+        this.deviceId = deviceId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
     }
 }

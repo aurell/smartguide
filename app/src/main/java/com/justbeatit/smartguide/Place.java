@@ -7,21 +7,37 @@ import java.util.Set;
  */
 
 public class Place {
-    public String Name;
-    public String MapImagePath;
-    public String Discounts;
-    public String Timetable;
-    public Set<Beacon> Beacons;
-
-    public Place() {
-
-    }
+    private final String name;
+    private final String mapImagePath;
+    private final String discounts;
+    private final String timetable;
+    private final Set<Beacon> beacons;
 
     public Place(String name, String mapImagePath, String discounts, String timetable, Set<Beacon> beacons) {
-        Name = name;
-        MapImagePath = mapImagePath;
-        Discounts = discounts;
-        Timetable = timetable;
-        Beacons = beacons;
+        this.name = name;
+        this.mapImagePath = mapImagePath;
+        this.discounts = discounts;
+        this.timetable = timetable;
+        this.beacons = beacons;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getMapImagePath() {
+        return mapImagePath;
+    }
+
+    public String getDiscounts() {
+        return discounts;
+    }
+
+    public String getTimetable() {
+        return timetable;
+    }
+
+    public Set<Beacon> getBeacons() {
+        return beacons;
     }
 }

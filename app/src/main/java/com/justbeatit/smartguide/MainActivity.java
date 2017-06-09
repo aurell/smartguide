@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.justbeatit.smartguide.text.Messanger;
 import com.justbeatit.smartguide.text.MessangerImpl;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity
 
     private final static int REQUEST_ENABLE_BT = 1;
     private static final int VOICE_RECOGNITION_REQUEST_CODE = 1001;
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
 
     Set<Place> places = new HashSet<>();
     Place currentPlace;
@@ -86,22 +88,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupLocations() {
-        Place shakespeareTheatre = new Place();
-        shakespeareTheatre.Name = "Gdański Teatr Szekspirowski";
-        shakespeareTheatre.Discounts = "Bilety promocyjne można zakupić tylko w kasie biletowej Teatru. Bilety ulgowe przysługują uczniom, studentom, nauczycielom, emerytom, rencistom oraz osobom niepełnosprawnym. Bilety ulgowe bez udokumentowania prawa do ulgi nie uprawniają do wejścia na widownię. Kupujący winien udać się do kasy biletowej Teatru i uiścić dopłatę.";
-        shakespeareTheatre.Timetable = "12:00 Dziennik przebudzenia 20:00 Mój ulubiony Młynarski";
-
-        shakespeareTheatre.Beacons = new HashSet<>();
-        shakespeareTheatre.Beacons.add(new Beacon("Kasa", "Tu możesz kupić bilety.", "Jesteś na parterze", "Agnieszka"));
-        shakespeareTheatre.Beacons.add(new Beacon("Toalety", "Toaleta dla niepełnosprawnych znajduje się na końcu korytarza", "Jesteś na poziomie -1", "Aurelia"));
-        shakespeareTheatre.Beacons.add(new Beacon("Scena", "Główna scena teatru. Tu odbywają się koncerty.", "Jesteś na parterze", "Dominik"));
-        shakespeareTheatre.Beacons.add(new Beacon("Wejście", "Główne wejście do budynku.", "Jesteś na parterze.", "robert"));
-
-        currentPlace = shakespeareTheatre;
+        currentPlace = new Place(
+                "Gdański Teatr Szekspirowski",
+                "",
+                "Bilety promocyjne można zakupić tylko w kasie biletowej Teatru. Bilety ulgowe przysługują uczniom, studentom, nauczycielom, emerytom, rencistom oraz osobom niepełnosprawnym. Bilety ulgowe bez udokumentowania prawa do ulgi nie uprawniają do wejścia na widownię. Kupujący winien udać się do kasy biletowej Teatru i uiścić dopłatę.",
+                "12:00 Dziennik przebudzenia. 20:00 Mój ulubiony Młynarski.",
+                new HashSet<>(Arrays.asList(
+                        new Beacon("Kasa", "Tu możesz kupić bilety.", "Jesteś na parterze", "Agnieszka"),
+                        new Beacon("Toalety", "Toaleta dla niepełnosprawnych znajduje się na końcu korytarza", "Jesteś na poziomie -1", "Aurelia"),
+                        new Beacon("Scena", "Główna scena teatru. Tu odbywają się koncerty.", "Jesteś na parterze", "Dominik"),
+                        new Beacon("Wejście", "Główne wejście do budynku.", "Jesteś na parterze.", "robert")
+                ))
+        );
     }
 
     private void discoverDevices() {
-        int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                 MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
@@ -151,13 +152,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setCurrentBeacon(String deviceId) {
-        if (currentPlace == null) return;
+        if (currentPlace == null || currentBeacon == null) return;
 
-        for (Beacon beacon : currentPlace.Beacons) {
-            if (deviceId.contains(beacon.DeviceId) && currentBeacon != beacon) {
+        for (Beacon beacon : currentPlace.getBeacons()) {
+            if (deviceId.contains(beacon.getDeviceId()) && !currentBeacon.equals(beacon)) {
                 currentBeacon = beacon;
-                messanger.sendMessage(currentBeacon.Name);
-                messanger.sendMessage(currentBeacon.Info);
+                messanger.sendMessage(currentBeacon.getName());
+                messanger.sendMessage(currentBeacon.getInfo());
             }
         }
     }
