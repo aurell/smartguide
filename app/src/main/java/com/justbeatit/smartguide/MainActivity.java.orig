@@ -94,6 +94,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupLocations() {
+<<<<<<< HEAD
+        Place shakespeareTheatre = new Place();
+        shakespeareTheatre.Name = "Gdański Teatr Szekspirowski";
+        shakespeareTheatre.Discounts = "Bilety promocyjne można zakupić tylko w kasie biletowej Teatru. Bilety ulgowe przysługują uczniom, studentom, nauczycielom, emerytom, rencistom oraz osobom niepełnosprawnym. Bilety ulgowe bez udokumentowania prawa do ulgi nie uprawniają do wejścia na widownię. Kupujący winien udać się do kasy biletowej Teatru i uiścić dopłatę.";
+        shakespeareTheatre.Timetable = "12:00 Dziennik przebudzenia 20:00 Mój ulubiony Młynarski";
+
+        shakespeareTheatre.Beacons = new HashSet<>();
+        shakespeareTheatre.Beacons.add(new Beacon("Kasa", "Tu możesz kupić bilety.", "Jesteś na parterze", "??????????"));
+        shakespeareTheatre.Beacons.add(new Beacon("Toalety", "Toaleta dla niepełnosprawnych znajduje się na końcu korytarza", "Jesteś na poziomie -1", "Aurelia"));
+        shakespeareTheatre.Beacons.add(new Beacon("Scena", "Główna scena teatru. Tu odbywają się koncerty.", "Jesteś na parterze", "Dominik"));
+        shakespeareTheatre.Beacons.add(new Beacon("Wejście", "Główne wejście do budynku.", "Jesteś na parterze.", "robert"));
+
+        currentPlace = shakespeareTheatre;
+=======
         currentPlace = new Place(
                 "Gdański Teatr Szekspirowski",
                 "",
@@ -106,6 +120,7 @@ public class MainActivity extends AppCompatActivity
                         new Beacon("Wejście", "Główne wejście do budynku.", "Jesteś na parterze.", "robert")
                 ))
         );
+>>>>>>> 9baf45038a9b271e00e610283f3fcd41a79a2a6f
     }
 
     private void discoverDevices() {
@@ -147,10 +162,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkCurrentBeacon() {
-        if (currentBeacon == null) return;
-        
         for (String device : devices) {
-            if (device.contains(currentBeacon.getDeviceId())) {
+            if (device.contains(currentBeacon.DeviceId)) {
                 return;
             }
         }
