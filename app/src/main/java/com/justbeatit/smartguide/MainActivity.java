@@ -1,9 +1,17 @@
 package com.justbeatit.smartguide;
 
+import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +23,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +34,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     final AtomicInteger x = new AtomicInteger(1);
+    List<String> devices = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,32 +61,68 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        try {
+        DiscoverDevices();
+        StartDiscoveringBeacons();
+    }
 
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                public void run() {
-                    runOnUiThread(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            try {
-                                TextView textView = (TextView) findViewById(R.id.mainTextView);
-                                int test = x.incrementAndGet();
-                                textView.setText(String.valueOf(test));
-                            }
-                            catch (Exception e) {
-                                String m = e.getMessage();
-                            }
-                        }
-                    });
+    private void DiscoverDevices() {
+        int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter.startDiscovery();
+        BroadcastReceiver mReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+
+                //Finding devices
+                if (BluetoothDevice.ACTION_FOUND.equals(action))
+                {
+                    // Get the BluetoothDevice object from the Intent
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // Add the name and address to an array adapter to show in a ListView
+                    devices.add(device.getName() + "\n" + device.getAddress());
                 }
-            }, 10, 1000);
+            }
+        };
 
-        }
-        catch(Exception e) {
-            String m = e.getMessage();
-        }
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(mReceiver, filter);
+    }
+
+
+    private void StartDiscoveringBeacons() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            StringBuilder sb = new StringBuilder();
+                            for (String s : devices)
+                            {
+                                sb.append(s);
+                                sb.append("\n");
+                            }
+
+                            TextView textView = (TextView) findViewById(R.id.mainTextView);
+                            textView.setText(sb.toString());
+
+                            /*
+                            int test = x.incrementAndGet();
+                            textView.setText(String.valueOf(test));*/
+                        }
+                        catch (Exception e) {
+                            String m = e.getMessage();
+                        }
+                    }
+                });
+            }
+        }, 10, 1000);
     }
 
     @Override
