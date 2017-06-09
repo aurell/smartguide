@@ -7,4 +7,10 @@
     <string name="info_start">Witaj. Wybierz rodzaj niepełnosprawności. Jeśli nie słyszysz kliknij w ucho, jeśli nie widzisz, po usłyszeniu sygnału powiedz: Jestem osobą niewidomą. W następnym kroku przeczytasz lub usłyszysz instrukcję, aby ją pominąć powiedz pomiń lub kliknij odpowiedni przycisk. Zawsze możesz do niej wrócić mówiąc instrukcja lub wybierając odpowiednią opcję z menu.</string>
 
     <string name="action_settings">Settings</string>
+
+    <string name="entry_info">Witaj, znajdujesz się na dworcu Gdański Teatr Szekspirowski. Mogę doprowadzić Cię do kas, do informacji, na perony i do toalety.</string>
+    <string name="entry_guide_to_toilets">Zrób trzy kroki w przód i skręć w lewo, idź około 10 kroków, a następnie skręć w lewo przez drzwi. </string>
+    <string name="upper_stairs_guide_to_toilet">Zejdź schodami na sam dół. Uważaj, schody zakręcają w połowie.</string>
+    <string name="lower_stairs_guide_to_toilet">Skręć w lewo i przejdź przez drzwi, a następnie skręć w prawo i idź przed siebie.</string>
+    <string name="toilet_guide_to_toilet">Skręć w prawo przez drzwi. Pierwsze drzwi po prawej to toaleta dla niepełnosprawnych.</string>
 </resources>

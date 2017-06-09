@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -85,12 +86,15 @@ public class MainActivity extends AppCompatActivity
 
         discoverDevices();
 
-        /*new Timer().schedule(new TimerTask() {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 messanger.sendMessage(getString(R.string.info_start));
             }
-        }, 2000);*/
+        }, 2000);
+
+
     }
 
     private void setupLocations() {
@@ -148,7 +152,7 @@ public class MainActivity extends AppCompatActivity
 
     private void checkCurrentBeacon() {
         if (currentBeacon == null) return;
-        
+
         for (String device : devices) {
             if (device.contains(currentBeacon.getDeviceId())) {
                 return;
