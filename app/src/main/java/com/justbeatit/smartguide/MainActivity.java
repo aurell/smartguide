@@ -1,5 +1,6 @@
 package com.justbeatit.smartguide;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,9 +13,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    final AtomicInteger x = new AtomicInteger(1);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +48,33 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        try {
+
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                TextView textView = (TextView) findViewById(R.id.mainTextView);
+                                int test = x.incrementAndGet();
+                                textView.setText(String.valueOf(test));
+                            }
+                            catch (Exception e) {
+                                String m = e.getMessage();
+                            }
+                        }
+                    });
+                }
+            }, 10, 1000);
+
+        }
+        catch(Exception e) {
+            String m = e.getMessage();
+        }
     }
 
     @Override
