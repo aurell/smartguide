@@ -1,14 +1,17 @@
 package com.justbeatit.smartguide;
 
 import android.Manifest;
+import android.app.SearchManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
+import android.speech.RecognizerIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -21,23 +24,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
+import android.widget.AdapterView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.justbeatit.smartguide.context.Messanger;
-import com.justbeatit.smartguide.context.MessangerImpl;
+import com.justbeatit.smartguide.text.Messanger;
+import com.justbeatit.smartguide.text.MessangerImpl;
 
 import java.util.HashSet;
-import java.util.Locale;
+import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private final static int REQUEST_ENABLE_BT = 1;
+    private static final int VOICE_RECOGNITION_REQUEST_CODE = 1001;
 
     Set<Place> places = new HashSet<>();
     Place currentPlace;
@@ -54,7 +58,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         messanger = new MessangerImpl(getApplicationContext(), this);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +66,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Speaking ...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                messanger.sendMessage("Testowy komunikat!");
+                speak(fab.getRootView());
             }
         });
 
@@ -112,7 +116,7 @@ public class MainActivity extends AppCompatActivity
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    String deviceId  = device.getName() + " " + device.getAddress();
+                    String deviceId = device.getName() + " " + device.getAddress();
                     if (!newDevices.contains(deviceId)) {
                         newDevices.add(deviceId);
                         setCurrentBeacon(deviceId);
@@ -228,5 +232,44 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void speak(View view) {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass()
+                .getPackage().getName());
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == VOICE_RECOGNITION_REQUEST_CODE)
+            if (resultCode == RESULT_OK) {
+                List<String> textMatchList = data
+                        .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                if (!textMatchList.isEmpty()) {
+                    String recognizedText = textMatchList.get(0);
+                    showToastMessage(recognizedText);
+
+                }
+            } else if (resultCode == RecognizerIntent.RESULT_AUDIO_ERROR) {
+                showToastMessage("Audio Error");
+            } else if (resultCode == RecognizerIntent.RESULT_CLIENT_ERROR) {
+                showToastMessage("Client Error");
+            } else if (resultCode == RecognizerIntent.RESULT_NETWORK_ERROR) {
+                showToastMessage("Network Error");
+            } else if (resultCode == RecognizerIntent.RESULT_NO_MATCH) {
+                showToastMessage("No Match");
+            } else if (resultCode == RecognizerIntent.RESULT_SERVER_ERROR) {
+                showToastMessage("Server Error");
+            }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    void showToastMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
