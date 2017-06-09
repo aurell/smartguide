@@ -82,7 +82,13 @@ public class MainActivity extends AppCompatActivity
         setupLocations();
 
         discoverDevices();
-        viewDiscoveredBeacons();
+
+        /*new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                messanger.sendMessage(getString(R.string.info_start));
+            }
+        }, 2000);*/
     }
 
     private void setupLocations() {
@@ -92,7 +98,7 @@ public class MainActivity extends AppCompatActivity
         shakespeareTheatre.Timetable = "12:00 Dziennik przebudzenia 20:00 Mój ulubiony Młynarski";
 
         shakespeareTheatre.Beacons = new HashSet<>();
-        shakespeareTheatre.Beacons.add(new Beacon("Kasa", "Tu możesz kupić bilety.", "Jesteś na parterze", "Agnieszka"));
+        shakespeareTheatre.Beacons.add(new Beacon("Kasa", "Tu możesz kupić bilety.", "Jesteś na parterze", "??????????"));
         shakespeareTheatre.Beacons.add(new Beacon("Toalety", "Toaleta dla niepełnosprawnych znajduje się na końcu korytarza", "Jesteś na poziomie -1", "Aurelia"));
         shakespeareTheatre.Beacons.add(new Beacon("Scena", "Główna scena teatru. Tu odbywają się koncerty.", "Jesteś na parterze", "Dominik"));
         shakespeareTheatre.Beacons.add(new Beacon("Wejście", "Główne wejście do budynku.", "Jesteś na parterze.", "robert"));
@@ -110,24 +116,24 @@ public class MainActivity extends AppCompatActivity
 
         BroadcastReceiver mReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
+            String action = intent.getAction();
 
-                //Finding devices
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            //Finding devices
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    String deviceId = device.getName() + " " + device.getAddress();
-                    if (!newDevices.contains(deviceId)) {
-                        newDevices.add(deviceId);
-                        setCurrentBeacon(deviceId);
-                    }
-                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                    devices.clear();
-                    devices.addAll(newDevices);
-                    newDevices.clear();
-                    checkCurrentBeacon();
-                    mBluetoothAdapter.startDiscovery();
+                String deviceId = device.getName() + " " + device.getAddress();
+                if (!newDevices.contains(deviceId)) {
+                    newDevices.add(deviceId);
+                    setCurrentBeacon(deviceId);
                 }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                devices.clear();
+                devices.addAll(newDevices);
+                newDevices.clear();
+                checkCurrentBeacon();
+                mBluetoothAdapter.startDiscovery();
+            }
             }
         };
 
