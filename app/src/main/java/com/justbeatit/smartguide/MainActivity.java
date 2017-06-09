@@ -103,15 +103,19 @@ public class MainActivity extends AppCompatActivity
                         newDevices.add(deviceId);
 
                         if (deviceId.contains("robert") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Robercie, znazłem twoje lenovo", TextToSpeech.QUEUE_FLUSH, null);
+                            textToSpeach.speak("Robercie, znalazłem twoje lenovo", TextToSpeech.QUEUE_FLUSH, null);
                         }
 
                         if (deviceId.contains("Dominik") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Dominiku, znazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
+                            textToSpeach.speak("Dominiku, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
                         }
 
                         if (deviceId.contains("Agnieszka") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Agnieszko, znazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
+                            textToSpeach.speak("Agnieszko, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
+                        }
+
+                        if (deviceId.contains("Aurelia") && !devices.contains(deviceId)){
+                            textToSpeach.speak("Aurelio, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
                         }
                     }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
