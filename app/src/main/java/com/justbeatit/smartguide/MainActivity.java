@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity
                     devices.clear();
                     devices.addAll(newDevices);
                     newDevices.clear();
+                    checkCurrentBeacon();
                     mBluetoothAdapter.startDiscovery();
                 }
             }
@@ -136,6 +137,17 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(mReceiver, filter);
         mBluetoothAdapter.startDiscovery();
 
+    }
+
+    private void checkCurrentBeacon() {
+        for (String device : devices) {
+            if (device.contains(currentBeacon.DeviceId)) {
+                return;
+            }
+        }
+
+        //Didn't found current beacon in devices!
+        currentBeacon = null;
     }
 
     private void setCurrentBeacon(String deviceId) {

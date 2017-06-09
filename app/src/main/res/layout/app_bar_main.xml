@@ -21,8 +21,7 @@
             android:contentInsetStart="0dp"
             android:contentInsetLeft="0dp"
             app:contentInsetLeft="0dp"
-            app:contentInsetStart="0dp"
-            >
+            app:contentInsetStart="0dp">
 
             <TextView
                 android:id="@+id/toolbar_title"
