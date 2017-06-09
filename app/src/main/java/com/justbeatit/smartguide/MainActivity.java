@@ -24,6 +24,9 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.justbeatit.smartguide.context.Messanger;
+import com.justbeatit.smartguide.context.MessangerImpl;
+
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -38,8 +41,7 @@ public class MainActivity extends AppCompatActivity
 
     final Set<String> devices = new HashSet<>();
     final Set<String> newDevices = new HashSet<>();
-    TextToSpeech textToSpeach;
-    Button speachButton;
+    Messanger messanger;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,22 +51,14 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-
-        textToSpeach = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status != TextToSpeech.ERROR) {
-                    textToSpeach.setLanguage(new Locale("pl", "PL"));
-                }
-            }
-        });
+        messanger = new MessangerImpl(getApplicationContext(), this);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Speaking ...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                textToSpeach.speak("Cześć Aurelia. Oto mówiący telefon!", TextToSpeech.QUEUE_FLUSH, null);
+                messanger.sendMessage("Testowy komunikat!");
             }
         });
 
@@ -103,19 +97,19 @@ public class MainActivity extends AppCompatActivity
                         newDevices.add(deviceId);
 
                         if (deviceId.contains("robert") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Robercie, znalazłem twoje lenovo", TextToSpeech.QUEUE_FLUSH, null);
+                            messanger.sendMessage("Robercie, znalazłem twoje lenovo");
                         }
 
                         if (deviceId.contains("Dominik") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Dominiku, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
+                            messanger.sendMessage("Dominiku, znalazłem twój telefon");
                         }
 
                         if (deviceId.contains("Agnieszka") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Agnieszko, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
+                            messanger.sendMessage("Agnieszko, znalazłem twój telefon");
                         }
 
                         if (deviceId.contains("Aurelia") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Aurelio, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
+                            messanger.sendMessage("Aurelio, znalazłem twój telefon");
                         }
                     }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
