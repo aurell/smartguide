@@ -36,6 +36,10 @@ public class MainActivity extends AppCompatActivity
 
     private final static int REQUEST_ENABLE_BT = 1;
 
+    Set<Place> places = new HashSet<>();
+    Place currentPlace;
+    Beacon currentBeacon;
+
     final Set<String> devices = new HashSet<>();
     final Set<String> newDevices = new HashSet<>();
     TextToSpeech textToSpeach;
@@ -77,10 +81,26 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        setupLocations();
+
         discoverDevices();
         viewDiscoveredBeacons();
     }
 
+    private void setupLocations() {
+        Place shakespeareTheatre = new Place();
+        shakespeareTheatre.Name = "Gdański Teatr Szekspirowski";
+        shakespeareTheatre.Discounts = "Bilety promocyjne można zakupić tylko w kasie biletowej Teatru. Bilety ulgowe przysługują uczniom, studentom, nauczycielom, emerytom, rencistom oraz osobom niepełnosprawnym. Bilety ulgowe bez udokumentowania prawa do ulgi nie uprawniają do wejścia na widownię. Kupujący winien udać się do kasy biletowej Teatru i uiścić dopłatę.";
+        shakespeareTheatre.Timetable = "12:00 Dziennik przebudzenia 20:00 Mój ulubiony Młynarski";
+
+        shakespeareTheatre.Beacons = new HashSet<>();
+        shakespeareTheatre.Beacons.add(new Beacon("Kasa", "Tu możesz kupić bilety.", "Jesteś na parterze", "Agnieszka"));
+        shakespeareTheatre.Beacons.add(new Beacon("Toalety", "Toaleta dla niepełnosprawnych znajduje się na końcu korytarza", "Jesteś na poziomie -1", "Aurelia"));
+        shakespeareTheatre.Beacons.add(new Beacon("Scena", "Główna scena teatru. Tu odbywają się koncerty.", "Jesteś na parterze", "Dominik"));
+        shakespeareTheatre.Beacons.add(new Beacon("Wejście", "Główne wejście do budynku.", "Jesteś na parterze.", "robert"));
+
+        currentPlace = shakespeareTheatre;
+    }
 
     private void discoverDevices() {
         int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
@@ -101,22 +121,7 @@ public class MainActivity extends AppCompatActivity
                     String deviceId  = device.getName() + " " + device.getAddress();
                     if (!newDevices.contains(deviceId)) {
                         newDevices.add(deviceId);
-
-                        if (deviceId.contains("robert") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Robercie, znalazłem twoje lenovo", TextToSpeech.QUEUE_FLUSH, null);
-                        }
-
-                        if (deviceId.contains("Dominik") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Dominiku, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
-                        }
-
-                        if (deviceId.contains("Agnieszka") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Agnieszko, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
-                        }
-
-                        if (deviceId.contains("Aurelia") && !devices.contains(deviceId)){
-                            textToSpeach.speak("Aurelio, znalazłem twój telefon", TextToSpeech.QUEUE_FLUSH, null);
-                        }
+                        setCurrentBeacon(deviceId);
                     }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     devices.clear();
@@ -133,6 +138,18 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(mReceiver, filter);
         mBluetoothAdapter.startDiscovery();
 
+    }
+
+    private void setCurrentBeacon(String deviceId) {
+        if (currentPlace == null) return;
+
+        for (Beacon beacon : currentPlace.Beacons) {
+            if (deviceId.contains(beacon.DeviceId) && currentBeacon != beacon) {
+                currentBeacon = beacon;
+                textToSpeach.speak(currentBeacon.Name, TextToSpeech.QUEUE_ADD, null);
+                textToSpeach.speak(currentBeacon.Info, TextToSpeech.QUEUE_ADD, null);
+            }
+        }
     }
 
 
@@ -153,9 +170,6 @@ public class MainActivity extends AppCompatActivity
                             TextView textView = (TextView) findViewById(R.id.mainTextView);
                             textView.setText(sb.toString());
 
-                            /*
-                            int test = x.incrementAndGet();
-                            textView.setText(String.valueOf(test));*/
                         } catch (Exception e) {
                             String m = e.getMessage();
                         }
