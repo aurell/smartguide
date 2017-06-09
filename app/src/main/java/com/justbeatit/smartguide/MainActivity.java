@@ -97,10 +97,11 @@ public class MainActivity extends AppCompatActivity
                 //Finding devices
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // Add the name and address to an array adapter to show in a ListView
-                    devices.add(device.getName() + "\n" + device.getAddress());
+
+                    String deviceId  = device.getName() + "\n" + device.getAddress();
                     if (!newDevices.contains(deviceId)) {
                         newDevices.add(deviceId);
+                    }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     devices.clear();
                     devices.addAll(newDevices);
