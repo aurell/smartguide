@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,8 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,7 +34,7 @@ public class MainActivity extends AppCompatActivity
     private final static int REQUEST_ENABLE_BT = 1;
 
     final AtomicInteger x = new AtomicInteger(1);
-    List<String> devices = new ArrayList<>();
+    final Set<String> devices = new HashSet<>();
     BluetoothAdapter mBluetoothAdapter;
 
     @Override
@@ -64,12 +62,12 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        DiscoverDevices();
-        StartDiscoveringBeacons();
+        discoverDevices();
+        startDiscoveringBeacons();
     }
 
 
-    private void DiscoverDevices() {
+    private void discoverDevices() {
         int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -107,7 +105,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void StartDiscoveringBeacons() {
+    private void startDiscoveringBeacons() {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
