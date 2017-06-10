@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity
 
     Place currentPlace;
     Messenger messenger;
+    Boolean navigationMode = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,49 +133,41 @@ public class MainActivity extends AppCompatActivity
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     String deviceId = device.getAddress();
-                    if (!currentPlace.isBeaconOnActivePath(deviceId)) {
-                        return;
-                    }
-                    if (currentPlace.isSeenBeenBefore(deviceId)) {
-                        return;
-                    }
-                    Beacon currentBeacon = currentPlace.getCurrentBeaconOnActivePath();
-                    if (null != currentBeacon && deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
-                        // we still receive signal from current beacon
-                        showToastMessage("Still the same beacon...");
-                        // messenger.sendMessage(currentBeacon.getInfo());
-                        return;
-                    }
-                    currentBeacon = getNextBeacon();
-                    if (null == currentBeacon) {
-                        return;
-                    }
-                    if (deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
-                        // we caught signal from next beacon on the path
-                        showToastMessage("Next beacon: " + deviceId);
-                        messenger.sendMessage(currentBeacon.getPathTips());
-                        currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
-                        return;
-                    } else {
-                        currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
-                        if (!deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
-                            currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
+
+                    if (navigationMode) {
+                        if (!currentPlace.isBeaconOnActivePath(deviceId)) {
+                            return;
                         }
-                        currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
+                        if (currentPlace.isSeenBeenBefore(deviceId)) {
+                            return;
+                        }
+                        Beacon currentBeacon = currentPlace.getCurrentBeaconOnActivePath();
+                        if (null != currentBeacon && deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
+                            // we still receive signal from current beacon
+                            showToastMessage("Still the same beacon...");
+                            // messenger.sendMessage(currentBeacon.getInfo());
+                            return;
+                        }
+                        currentBeacon = getNextBeacon();
+                        if (null == currentBeacon) {
+                            return;
+                        }
+                        if (deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
+                            // we caught signal from next beacon on the path
+                            showToastMessage("Next beacon: " + deviceId);
+                            messenger.sendMessage(currentBeacon.getPathTips());
+                            currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
+                            return;
+                        } else {
+                            currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
+                            if (!deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
+                                currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
+                            }
+                            currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
+                        }
+                    } else {
+
                     }
-//                    currentPlace.getPreviousBeaconOnActivePath();
-//                    currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
-//                    if (null == currentBeacon) {
-//                        showToastMessage("Path lost!");
-//                        return;
-//                    }
-//                    if (deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
-//                        // we still receive signal from current beacon
-//                        showToastMessage("Previous beacon: " + deviceId);
-//                        messenger.sendMessage(currentBeacon.getInfo());
-//                        currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
-//                        return;
-//                    }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     mBluetoothAdapter.startDiscovery();
                 }
