@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
 
     Place currentPlace;
-    Beacon currentBeacon;
-
     Messenger messenger;
 
     @Override
@@ -302,10 +300,10 @@ public class MainActivity extends AppCompatActivity
         } else if (text.toLowerCase().contains("ulgi")) {
             messenger.sendMessage(currentPlace.getDiscounts());
         }  else if (text.toLowerCase().contains("gdzie jestem")) {
-            if (currentBeacon == null) {
+            if (currentPlace.getCurrentBeaconOnActivePath() == null) {
                 messenger.sendMessage("Nie można określić lokalizacji.");
             } else {
-                messenger.sendMessage(currentBeacon.getName());
+                messenger.sendMessage(currentPlace.getCurrentBeaconOnActivePath().getName());
             }
         } else if (text.toLowerCase().contains("rozkład jazdy")) {
             messenger.sendMessage(currentPlace.getTimetable());
