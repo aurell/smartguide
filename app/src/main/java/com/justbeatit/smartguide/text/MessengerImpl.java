@@ -45,8 +45,8 @@ public class MessengerImpl implements Messenger {
             case BLIND:
                 textToSpeach.speak(message, TextToSpeech.QUEUE_ADD, null);
             case DEAF:
-                Toast textToDisplay = Toast.makeText(context, message, Toast.LENGTH_LONG);
-                textToDisplay.show();
+//                Toast textToDisplay = Toast.makeText(context, message, Toast.LENGTH_LONG);
+//                textToDisplay.show();
                 break;
         }
     }
