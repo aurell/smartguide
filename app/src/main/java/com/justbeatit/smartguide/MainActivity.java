@@ -306,6 +306,10 @@ public class MainActivity extends AppCompatActivity
             } else {
                 messenger.sendMessage(currentBeacon.getName());
             }
+        } else if (text.toLowerCase().contains("rozkład jazdy")) {
+            messenger.sendMessage(currentPlace.getTimetable());
+        } else if (text.toLowerCase().contains("lista komend")) {
+            messenger.sendMessage("Instrukcja, pomoc, lista obiektów, ulgi, rozkład jazdy, gdzie jestem");
         }
     }
 
