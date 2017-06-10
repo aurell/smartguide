@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity
 
     private void setupLocations() {
         currentPlace = new Place(
-                "Gdański Teatr Szekspirowski",
+                "Dworzec Gdański Teatr Szekspirowski",
                 "",
                 "Bilety promocyjne można zakupić tylko w kasie biletowej Teatru. Bilety ulgowe przysługują uczniom, studentom, nauczycielom, emerytom, rencistom oraz osobom niepełnosprawnym. Bilety ulgowe bez udokumentowania prawa do ulgi nie uprawniają do wejścia na widownię. Kupujący winien udać się do kasy biletowej Teatru i uiścić dopłatę.",
                 "12:00 Dziennik przebudzenia. 20:00 Mój ulubiony Młynarski.",
@@ -119,6 +119,8 @@ public class MainActivity extends AppCompatActivity
                                 "28:ED:6A:40:B9:39"
                         )
                 )));
+
+        places.add(currentPlace);
     }
 
     private void discoverDevices() {
@@ -271,7 +273,7 @@ public class MainActivity extends AppCompatActivity
                 if (!textMatchList.isEmpty()) {
                     String recognizedText = textMatchList.get(0);
                     showToastMessage(recognizedText);
-
+                    runVoiceCommand(recognizedText);
                 }
             } else if (resultCode == RecognizerIntent.RESULT_AUDIO_ERROR) {
                 showToastMessage("Audio Error");
@@ -285,6 +287,38 @@ public class MainActivity extends AppCompatActivity
                 showToastMessage("Server Error");
             }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void runVoiceCommand(String text) {
+        if (text.toLowerCase().contains("pomoc")) {
+            CallForHelp();
+        } else if (text.toLowerCase().contains("instrukcja")) {
+            messenger.sendMessage(getString(R.string.command_instructions));
+        } else if (text.toLowerCase().contains("lista obiektów")) {
+            for (Place place : places) {
+                messenger.sendMessage(place.getName());
+            }
+        } else if (text.toLowerCase().contains("ulgi")) {
+            messenger.sendMessage(currentPlace.getDiscounts());
+        }  else if (text.toLowerCase().contains("gdzie jestem")) {
+            if (currentBeacon == null) {
+                messenger.sendMessage("Nie można określić lokalizacji.");
+            } else {
+                messenger.sendMessage(currentBeacon.getName());
+            }
+        }
+    }
+
+    private void CallForHelp() {
+        //TODO: send sms message or application notification
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                messenger.sendMessage("Wezwano pomoc.");
+
+            }
+        }, 2000);
     }
 
     void showToastMessage(String message) {

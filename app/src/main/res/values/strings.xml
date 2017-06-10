@@ -4,6 +4,11 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="command_instructions">Smart Guide jest aplikacją przeznaczoną dla osób głuchych, głuchoniemych, niedosłyszących, niewidomych i niedowidzących. Umożliwia ona samodzielne poruszanie się po lotniskach, dworcach i innych obiektach komunikacyjnych, które zaopatrzone są w system Beaconów. Beacony to małe komputery, ukryte w naklejkach lub malutkich nadajnikach. Smart Guide odbiera sygnały z Beaconów i udziela Ci informacji o Twoim położeniu oraz pozwala znaleźć drogę do kluczowych punktów w budynku. W przeciwieństwie do tradycyjnego GPSa, system Beaconów pozwala określić dokładną lokalizację wewnątrz budynków, a także na różnych jego piętrach.
+Sygnał wibracyjny oznacza, że zostanie wyświetlona lub przeczytana informacja z Beacona.
+Po wypowiedzeniu hasła "Komendy" osoby niewidome i niedowidzące usłyszą listę komend, których wypowiedzenie pozwoli uzyskać interesujące informacje.
+Aby poznać pełną listę obiektów obsługujących Beacony i naszą aplikację, powiedz "Lista obiektów"</string>
+
     <string name="info_start">Witaj. Wybierz rodzaj niepełnosprawności. Jeśli nie słyszysz kliknij w ucho, jeśli nie widzisz, po usłyszeniu sygnału powiedz: Jestem osobą niewidomą. W następnym kroku przeczytasz lub usłyszysz instrukcję, aby ją pominąć powiedz pomiń lub kliknij odpowiedni przycisk. Zawsze możesz do niej wrócić mówiąc instrukcja lub wybierając odpowiednią opcję z menu.</string>
 
     <string name="action_settings">Settings</string>
