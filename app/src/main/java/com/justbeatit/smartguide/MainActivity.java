@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity
                         ),
                         new Beacon("Toaleta",
                                 "Skręć w lewo, toaleta jest za drzwiami po prawej stronie.",
-                                "Toaleta.",
+                                getString(R.string.toilet_guide_to_toilet),
                                 "28:ED:6A:40:B9:39"
                         )
                 )));
