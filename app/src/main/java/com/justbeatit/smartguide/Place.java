@@ -47,32 +47,28 @@ public class Place {
         return timetable;
     }
 
-    public void startDefaultPath() {
+    public synchronized void startDefaultPath() {
         pathWalker = defaultPath.listIterator();
         currentBeacon = null;
     }
 
-    public Beacon getNextBeaconOnActivePath() {
-        if(pathWalker.hasNext()) {
+    public synchronized Beacon getNextBeaconOnActivePath() {
+        if (pathWalker.hasNext()) {
             return pathWalker.next();
         }
-        else {
-            // end of path
-            return null;
-        }
+        // end of path
+        return null;
     }
 
-    public Beacon getPreviousBeaconOnActivePath() {
+    public synchronized Beacon getPreviousBeaconOnActivePath() {
         if (pathWalker.hasPrevious()) {
             return pathWalker.previous();
         }
-        else {
-            // beginning of the path
-            return null;
-        }
+        // beginning of the path
+        return null;
     }
 
-    public boolean isBeaconOnActivePath(String deviceId) {
+    public synchronized boolean isBeaconOnActivePath(String deviceId) {
         for (Beacon beacon : beacons) {
             if (beacon.getDeviceId().equalsIgnoreCase(deviceId)) {
                 return true;
@@ -81,11 +77,26 @@ public class Place {
         return false;
     }
 
-    public Beacon getCurrentBeaconOnActivePath() {
+    public synchronized boolean isSeenBeenBefore(String deviceId) {
+        if (null == currentBeacon) {
+            return false;
+        }
+        for (Beacon beacon : defaultPath) {
+            if (beacon.getDeviceId().equalsIgnoreCase(currentBeacon.getDeviceId())) {
+                break;
+            }
+            if (beacon.getDeviceId().equalsIgnoreCase(deviceId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized Beacon getCurrentBeaconOnActivePath() {
         return currentBeacon;
     }
 
-    public void setCurrentBeaconOnActivePath(Beacon beacon) {
+    public synchronized void setCurrentBeaconOnActivePath(Beacon beacon) {
         if (defaultPath.contains(beacon)) {
             currentBeacon = beacon;
         }

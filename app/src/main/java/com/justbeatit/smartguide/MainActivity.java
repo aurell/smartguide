@@ -23,7 +23,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.justbeatit.smartguide.text.Messenger;
@@ -34,8 +33,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -44,7 +41,6 @@ public class MainActivity extends AppCompatActivity
     private static final int VOICE_RECOGNITION_REQUEST_CODE = 1001;
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
 
-    Set<Place> places = new HashSet<>();
     Place currentPlace;
     Beacon currentBeacon;
 
@@ -87,6 +83,7 @@ public class MainActivity extends AppCompatActivity
                 messenger.sendMessage(getString(R.string.info_start));
                 currentPlace.startDefaultPath();
                 discoverDevices();
+
             }
         }, 2000);
     }
@@ -100,17 +97,17 @@ public class MainActivity extends AppCompatActivity
                 new ArrayList<>(Arrays.asList(
                         new Beacon("Wejście",
                                 "Witamy w teatrze szekspirowskim.",
-                                "Jesteś przy wejściu",
+                                getString(R.string.entry_guide_to_toilets),
                                 "98:E7:F5:83:D3:A4"
                         ),
                         new Beacon("Schody - góra",
-                                "Skręć w lewi i schodami na sam dół.",
-                                "Jesteś w hallu przy schodach",
+                                "Skręć w lewio i schodami na sam dół.",
+                                getString(R.string.upper_stairs_guide_to_toilet),
                                 "28:ED:6A:40:B9:39"
                         ),
                         new Beacon("Schody - dół",
                                 "Skręć w lewo, za drzwiami w prawo.",
-                                "Jesteś na poziomie -1 przy schodach",
+                                getString(R.string.lower_stairs_guide_to_toilet),
                                 "50:55:27:24:AF:26"
                         ),
                         new Beacon("Toaleta",
@@ -120,7 +117,6 @@ public class MainActivity extends AppCompatActivity
                         )
                 )));
 
-        places.add(currentPlace);
     }
 
     private void discoverDevices() {
@@ -141,6 +137,9 @@ public class MainActivity extends AppCompatActivity
                     if (!currentPlace.isBeaconOnActivePath(deviceId)) {
                         return;
                     }
+                    if (currentPlace.isSeenBeenBefore(deviceId)) {
+                        return;
+                    }
                     Beacon currentBeacon = currentPlace.getCurrentBeaconOnActivePath();
                     if (null != currentBeacon && deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
                         // we still receive signal from current beacon
@@ -148,7 +147,7 @@ public class MainActivity extends AppCompatActivity
                         // messenger.sendMessage(currentBeacon.getInfo());
                         return;
                     }
-                    currentBeacon = validateBeaconAndGetNext(currentBeacon);
+                    currentBeacon = getNextBeacon();
                     if (null == currentBeacon) {
                         return;
                     }
@@ -158,20 +157,26 @@ public class MainActivity extends AppCompatActivity
                         messenger.sendMessage(currentBeacon.getPathTips());
                         currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
                         return;
-                    }
-                    currentPlace.getPreviousBeaconOnActivePath();
-                    currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
-                    if (null == currentBeacon) {
-                        showToastMessage("Path lost!");
-                        return;
-                    }
-                    if (deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
-                        // we still receive signal from current beacon
-                        showToastMessage("Previous beacon: " + deviceId);
-                        messenger.sendMessage(currentBeacon.getInfo());
+                    } else {
+                        currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
+                        if (!deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
+                            currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
+                        }
                         currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
-                        return;
                     }
+//                    currentPlace.getPreviousBeaconOnActivePath();
+//                    currentBeacon = currentPlace.getPreviousBeaconOnActivePath();
+//                    if (null == currentBeacon) {
+//                        showToastMessage("Path lost!");
+//                        return;
+//                    }
+//                    if (deviceId.equalsIgnoreCase(currentBeacon.getDeviceId())) {
+//                        // we still receive signal from current beacon
+//                        showToastMessage("Previous beacon: " + deviceId);
+//                        messenger.sendMessage(currentBeacon.getInfo());
+//                        currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
+//                        return;
+//                    }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     mBluetoothAdapter.startDiscovery();
                 }
@@ -186,10 +191,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Nullable
-    private Beacon validateBeaconAndGetNext(Beacon currentBeacon) {
-        if (null == currentBeacon) {
-            currentBeacon = currentPlace.getNextBeaconOnActivePath();
-        }
+    private Beacon getNextBeacon() {
+        Beacon currentBeacon = currentPlace.getNextBeaconOnActivePath();
         if (null == currentBeacon) {
             // path is finished
             showToastMessage("Path finished!");
@@ -295,9 +298,7 @@ public class MainActivity extends AppCompatActivity
         } else if (text.toLowerCase().contains("instrukcja")) {
             messenger.sendMessage(getString(R.string.command_instructions));
         } else if (text.toLowerCase().contains("lista obiektów")) {
-            for (Place place : places) {
-                messenger.sendMessage(place.getName());
-            }
+            messenger.sendMessage(currentPlace.getName());
         } else if (text.toLowerCase().contains("ulgi")) {
             messenger.sendMessage(currentPlace.getDiscounts());
         }  else if (text.toLowerCase().contains("gdzie jestem")) {
