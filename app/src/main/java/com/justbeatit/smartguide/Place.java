@@ -102,7 +102,19 @@ public class Place {
         }
     }
 
+    public synchronized void setCurrentBeacon(Beacon beacon) {
+        currentBeacon = beacon;
+    }
+
+    public synchronized Beacon getCurrentBeacon() {
+        return currentBeacon;
+    }
+
     private void setDefaultPath(Collection<Beacon> beacons) {
         defaultPath.addAll(beacons);
+    }
+
+    public List<Beacon> getBeacons() {
+        return beacons;
     }
 }

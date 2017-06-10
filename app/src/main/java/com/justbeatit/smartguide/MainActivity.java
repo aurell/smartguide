@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity
 
     Place currentPlace;
     Messenger messenger;
-    Boolean navigationMode = true;
+    Boolean navigationMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +79,7 @@ public class MainActivity extends AppCompatActivity
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                messenger.sendMessage(getString(R.string.info_start));
-                currentPlace.startDefaultPath();
+                //messenger.sendMessage(getString(R.string.info_start));
                 discoverDevices();
 
             }
@@ -95,25 +94,30 @@ public class MainActivity extends AppCompatActivity
                 "12:00 Dziennik przebudzenia. 20:00 Mój ulubiony Młynarski.",
                 new ArrayList<>(Arrays.asList(
                         new Beacon("Wejście",
-                                "Witamy w teatrze szekspirowskim.",
+                                getString(R.string.entry_info),
                                 getString(R.string.entry_guide_to_toilets),
                                 "98:E7:F5:83:D3:A4"
                         ),
-                        new Beacon("Schody - góra",
-                                "Skręć w lewio i schodami na sam dół.",
+                        new Beacon("Informacja",
+                                "Jesteś przy punkcie informacyjnym.",
                                 getString(R.string.upper_stairs_guide_to_toilet),
-                                "28:ED:6A:40:B9:39"
-                        ),
-                        new Beacon("Schody - dół",
-                                "Skręć w lewo, za drzwiami w prawo.",
-                                getString(R.string.lower_stairs_guide_to_toilet),
+                                "50:55:27:24:AF:26"
+                        )
+                        /*new Beacon("Schody - góra",
+                                "Jesteś na górze schodów. Na dole są toalety.",
+                                getString(R.string.upper_stairs_guide_to_toilet),
                                 "50:55:27:24:AF:26"
                         ),
+                        new Beacon("Schody - dół",
+                                "Jesteś na dole schodów. Na górze są kasy i wyjście.",
+                                getString(R.string.lower_stairs_guide_to_toilet),
+                                "98:E7:F5:83:D3:A4"
+                        ),
                         new Beacon("Toaleta",
-                                "Skręć w lewo, toaleta jest za drzwiami po prawej stronie.",
+                                "Toaleta dla osób niepełnosprawnych znajduje się po prawej stronie.",
                                 getString(R.string.toilet_guide_to_toilet),
-                                "28:ED:6A:40:B9:39"
-                        )
+                                "50:55:27:24:AF:26"
+                        )*/
                 )));
 
     }
@@ -166,7 +170,16 @@ public class MainActivity extends AppCompatActivity
                             currentPlace.setCurrentBeaconOnActivePath(currentBeacon);
                         }
                     } else {
+                        for (Beacon beacon : currentPlace.getBeacons()) {
+                            if (deviceId.equals(beacon.getDeviceId())) {
+                                if (currentPlace.getCurrentBeacon() != null && currentPlace.getCurrentBeacon().getDeviceId().equals(deviceId))
+                                    return;
 
+                                currentPlace.setCurrentBeacon(beacon);
+                                messenger.sendMessage(currentPlace.getCurrentBeacon().getName());
+                                messenger.sendMessage(currentPlace.getCurrentBeacon().getInfo());
+                            }
+                        }
                     }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     mBluetoothAdapter.startDiscovery();
@@ -297,11 +310,15 @@ public class MainActivity extends AppCompatActivity
                 messenger.sendMessage("Nie można określić lokalizacji.");
             } else {
                 messenger.sendMessage(currentPlace.getCurrentBeaconOnActivePath().getName());
+                messenger.sendMessage(currentPlace.getCurrentBeaconOnActivePath().getInfo());
             }
         } else if (text.toLowerCase().contains("rozkład jazdy")) {
             messenger.sendMessage(currentPlace.getTimetable());
         } else if (text.toLowerCase().contains("lista komend")) {
             messenger.sendMessage("Instrukcja, pomoc, lista obiektów, ulgi, rozkład jazdy, gdzie jestem");
+        } else if (text.toLowerCase().contains("prowadź do")) {
+            currentPlace.startDefaultPath();
+            navigationMode = true;
         }
     }
 
